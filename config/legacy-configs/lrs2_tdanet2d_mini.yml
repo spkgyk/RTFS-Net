@@ -1,0 +1,119 @@
+# Video network config
+videonet:
+    model_name: EncoderAE
+    in_channels: 1
+    base_channels: 4
+    num_layers: 3
+    is2d: True
+    pretrain: ../experiments/autoencoder/default/best_model.pth
+audionet:
+    n_src: 1
+    pretrained_vout_chan: 121                  # output from pretrained model
+    concat_first: True
+
+    video_bn_params:
+      out_chan: 64
+      kernel_size: 1
+      is2d: True
+
+    audio_bn_params:
+      out_chan: 64
+      kernel_size: 1
+      is2d: True
+
+    enc_dec_params:
+      encoder_type: STFTEncoder
+      decoder_type: STFTDecoder
+      win: 256
+      hop_length: 128
+      out_chan: 128
+      kernel_size: 3
+      stride: 1
+      bias: False
+      act_type: ReLU
+      norm_type: gLN
+      
+    audio_params:
+      audio_net: TDANet
+      # in_chan same as audio_bn_chan
+      hid_chan: 64                       # TDANet hidden channels
+      upsampling_depth: 5
+      shared: True
+      repeats: 4
+      norm_type: gLN
+      act_type: PReLU
+      kernel_size: 5
+      stride: 2 
+      is2d: True
+      attention_params:
+        attention_type: GlobalAttention2D
+        ffn_name: FeedForwardNetwork
+        kernel_size: 5
+        n_head: 8
+        dropout: 0.1
+        group_ffn: True
+        single_ffn: False
+
+    video_params:
+      video_net: TDANet
+      # in_chan same as video_bn_chan
+      hid_chan: 64
+      upsampling_depth: 4
+      shared: True
+      repeats: 1
+      norm_type: BatchNorm2d
+      act_type: PReLU
+      kernel_size: 3
+      stride: 2
+      is2d: True
+      attention_params:
+        attention_type: GlobalAttention2D
+        ffn_name: FeedForwardNetwork
+        kernel_size: 3
+        n_head: 8
+        dropout: 0.1
+        group_ffn: True
+        single_ffn: False
+
+    fusion_params:
+      fusion_type: ConcatFusion
+      fusion_shared: True
+      is2d: True
+
+    mask_generation_params:
+      mask_generator_type: RI_MaskGenerator
+      mask_act: ReLU
+      is2d: True
+      output_gate: True
+      
+# Training config
+training:
+    gpus: [0,1,2,3,4,5,6,7]
+    epochs: 200
+    batch_size: 8
+    num_workers: 8
+    half_lr: yes
+    early_stop: yes
+    divide_lr_by: null
+    online_mix: false
+# Optim config
+optim:
+    optimizer: adamw
+    lr: 0.001
+    weight_decay: 0.1
+# Sche config
+sche:
+    patience: 49
+    factor: 0.5
+# Data config
+data:
+    train_dir: data-preprocess/LRS2/tr
+    valid_dir: data-preprocess/LRS2/cv
+    nondefault_nsrc: 1
+    sample_rate: 16000
+    segment: 2.0
+    normalize_audio: false
+log:
+    path: log/tmp
+    pro_name: project
+    exp_name: ctcnet_mini/tdanet2d/29_05_23_RI

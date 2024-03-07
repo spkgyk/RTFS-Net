@@ -1,0 +1,100 @@
+# Video network config
+videonet:
+    model_name: FRCNNVideoModel
+    backbone_type: resnet
+    relu_type: prelu
+    width_mult: 1.0
+    pretrain: ../pretrain_zoo/frcnn_128_512.backbone.pth.tar
+audionet:
+    n_src: 1
+    pretrained_vout_chan: 512                  # output from pretrained model
+
+    video_bn_params:
+      out_chan: 64
+      kernel_size: 1
+      is2d: false
+
+    audio_bn_params:
+      out_chan: 512
+      kernel_size: 1
+      is2d: false
+
+    enc_dec_params:
+      encoder_type: ConvolutionalEncoder
+      decoder_type: ConvolutionalDecoder
+      out_chan: 512
+      kernel_size: 21
+      stride: 10
+      bias: false
+      act_type: ReLU
+      norm_type: gLN
+      layers: 1
+
+    audio_params:
+      audio_net: FRCNN
+      # in_chan same as audio_bn_chan
+      hid_chan: 512                       # FRCNN hidden channels
+      kernel_size: 5
+      stride: 2 
+      norm_type: gLN
+      act_type: PReLU
+      upsampling_depth: 5
+      repeats: 4
+      shared: true
+      is2d: false
+
+    video_params:
+      video_net: FRCNN
+      # in_chan same as video_bn_chan
+      hid_chan: 64
+      kernel_size: 3
+      stride: 2
+      norm_type: BatchNorm1d
+      act_type: PReLU
+      upsampling_depth: 4
+      repeats: 1
+      shared: false
+      is2d: false
+
+    fusion_params:
+      fusion_type: ConcatFusion
+      fusion_shared: false
+      kernel_size: 1
+      is2d: false
+
+    mask_generation_params:
+      mask_generator_type: MaskGenerator
+      mask_act: ReLU
+      is2d: false
+      
+# Training config
+training:
+    gpus: [0,1,2,3,4,5,6,7]
+    epochs: 200
+    batch_size: 8
+    num_workers: 8
+    half_lr: true
+    early_stop: true
+    divide_lr_by: null
+    online_mix: false
+# Optim config
+optim:
+    optimizer: adamw
+    lr: 0.001
+    weight_decay: 0.1
+# Sche config
+sche:
+    patience: 49
+    factor: 0.5
+# Data config
+data:
+    train_dir: data-preprocess/LRS3/tr
+    valid_dir: data-preprocess/LRS3/cv
+    nondefault_nsrc: 1
+    sample_rate: 16000
+    segment: 2.0
+    normalize_audio: false
+log:
+    path: log/tmp
+    pro_name: project
+    exp_name: LRS3/small/ctcnet

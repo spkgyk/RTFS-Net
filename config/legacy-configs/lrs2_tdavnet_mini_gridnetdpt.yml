@@ -1,0 +1,124 @@
+# Video network config
+videonet:
+    model_name: FRCNNVideoModel
+    backbone_type: resnet
+    relu_type: prelu
+    width_mult: 1.0
+    pretrain: ../pretrain_zoo/frcnn_128_512.backbone.pth.tar
+audionet:
+    n_src: 1
+    pretrained_vout_chan: 512                  # output from pretrained model
+
+    video_bn_params:
+      kernel_size: -1
+
+    audio_bn_params:
+      out_chan: 256
+      kernel_size: 1
+      is2d: true
+
+    enc_dec_params:
+      encoder_type: STFTEncoder
+      decoder_type: STFTDecoder
+      win: 256
+      hop_length: 128
+      out_chan: 256
+      kernel_size: 3
+      stride: 1
+      bias: false
+      act_type: ReLU
+      norm_type: gLN
+
+    audio_params:
+      audio_net: TDANet
+      # in_chan same as audio_bn_chan
+      hid_chan: 32
+      kernel_size: 5
+      stride: 2 
+      norm_type: gLN
+      act_type: PReLU
+      upsampling_depth: 2
+      repeats: 4
+      shared: true
+      is2d: true
+      layers:
+        layer_1:
+          layer_type: DualPathRNN
+          hid_chan: 32
+          dim: 3
+          kernel_size: 8
+          stride: 1
+          rnn_type: LSTM
+          bidirectional: true
+        layer_2:
+          layer_type: MultiHeadSelfAttention2D
+          dim: 4
+          n_freqs: 126
+          n_head: 4
+          hid_chan: 4
+          act_type: PReLU
+          norm_type: LayerNormalization4D
+
+    video_params:
+      video_net: TDANet
+      # in_chan same as video_bn_chan
+      hid_chan: 64
+      kernel_size: 3
+      stride: 2
+      norm_type: BatchNorm1d
+      act_type: PReLU
+      upsampling_depth: 4
+      repeats: 1
+      shared: true
+      is2d: false
+      layers:
+        layer_1:
+          layer_type: GlobalAttention
+          ffn_name: FeedForwardNetwork
+          kernel_size: 3
+          n_head: 8
+          dropout: 0.1
+
+    fusion_params:
+      fusion_type: InjectionFusion
+      fusion_shared: true
+      kernel_size: 1
+      is2d: true
+
+    mask_generation_params:
+      mask_generator_type: MaskGenerator
+      mask_act: ReLU
+      RI_split: true
+      is2d: true
+      
+# Training config
+training:
+    gpus: [0,1,2,3,4,5,6,7]
+    epochs: 200
+    batch_size: 4
+    num_workers: 8
+    half_lr: true
+    early_stop: true
+    divide_lr_by: null
+    online_mix: false
+# Optim config
+optim:
+    optimizer: adamw
+    lr: 0.001
+    weight_decay: 0.1
+# Sche config
+sche:
+    patience: 49
+    factor: 0.5
+# Data config
+data:
+    train_dir: data-preprocess/LRS2/tr
+    valid_dir: data-preprocess/LRS2/cv
+    nondefault_nsrc: 1
+    sample_rate: 16000
+    segment: 2.0
+    normalize_audio: false
+log:
+    path: log/tmp
+    pro_name: project
+    exp_name: avnet_mini/tdavnet/06_08_23_gridnetdpt
