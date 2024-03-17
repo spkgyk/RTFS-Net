@@ -43,6 +43,8 @@ class TDANetBlock(nn.Module):
             in_chan=self.in_chan,
             out_chan=self.hid_chan,
             kernel_size=1,
+            norm_type=self.norm_type,
+            act_type=self.act_type,
             is2d=self.is2d,
         )
         self.downsample_layers = self.__build_downsample_layers()
