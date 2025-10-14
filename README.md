@@ -1,4 +1,4 @@
-______________________________________________________________________
+---
 
 <div align="center">
 
@@ -14,9 +14,11 @@ Welcome to the official GitHub repository of [RTFS-Net](https://arxiv.org/abs/23
 # Introduction
 
 ## Problem:
-The 'cocktail party problem' highlights the difficulty machines face in isolating a single voice from overlapping conversations and background noise. 
+
+The 'cocktail party problem' highlights the difficulty machines face in isolating a single voice from overlapping conversations and background noise.
 
 ### Issues with Current Audio-Visual Speech Separation Methods:
+
 - **T-domain Methods:** These offer high-quality audio separation but suffer from high computational complexity and slow processing due to their extensive parameter count.
 - **TF-domain Methods:** More efficient in computation but historically underperform compared to T-domain methods. They face three key challenges:
   1. Lack of independent modeling of time and frequency dimensions.
@@ -24,12 +26,13 @@ The 'cocktail party problem' highlights the difficulty machines face in isolatin
   3. Poor handling of complex features, leading to loss of critical amplitude and phase information.
 
 ### Proposed Solution: Recursive Time-Frequency Separation Network (RTFS-Net)
+
 - **Approach:** Integrates audio and high-fidelity visual cues using a novel TF-domain method.
 - **Innovations:**
   1. **RTFS Blocks:** Compress and independently model acoustic dimensions (time and frequency), minimizing information loss while creating a low-complexity subspace.
   2. **Cross-dimensional Attention Fusion (CAF) Block:** Efficiently fuses audio and visual information for enhanced voice separation while utilizing 1.3% the computational complexity of the previous SOTA method.
   3. **Spectral Source Separation ($S^3$) Block:** Effectively extracts the target speaker's voice features using complex numbers.
- 
+
 ## Results and Comparison
 
 Comparison of RTFS-Net with existing AVSS methods.
@@ -39,7 +42,7 @@ Comparison of RTFS-Net with existing AVSS methods.
 The dataflow of RTFS-Net is described below. See our [paper](https://arxiv.org/abs/2309.17189) for more details.
 
 ![av-pipeline](docs/av-pipeline.jpg)
-The red and blue solid lines signify the flow directions of auditory and visual features respectively. The snowflake indicates the weights are frozen and the component is not involved in training. 
+The red and blue solid lines signify the flow directions of auditory and visual features respectively. The snowflake indicates the weights are frozen and the component is not involved in training.
 
 The core of RTFS-Net is the dual path core architecture shown below, named "RTFS Blocks".
 ![rtfsnet](docs/rtfsnet.jpg)
@@ -54,6 +57,7 @@ Audio-visual speech separation (AVSS) methods aim to integrate different modalit
 Before you begin, ensure you have [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installed on your system. Then, follow these steps:
 
 1. Clone this repository to your local machine:
+
    ```bash
    git clone https://github.com/spkgyk/RTFS-Net.git
    cd RTFS-Net
@@ -69,7 +73,7 @@ Before you begin, ensure you have [Miniconda](https://docs.conda.io/en/latest/mi
 
 ## Datasets & Pretrained Video Model
 
-1. Please download the pretrained video module used in our experiments by visiting [CTCNet](https://github.com/JusperLee/CTCNet)'s official repository. Instructions for downloading the various datasets used in our paper are also there, along with some additional scripts and utils for running the models in various real-world situations. 
+1. Please download the pretrained video module used in our experiments by visiting [CTCNet](https://github.com/JusperLee/CTCNet)'s official repository. Instructions for downloading the various datasets used in our paper are also there, along with some additional scripts and utils for running the models in various real-world situations.
 
 2. Once the datasets are downloaded and formatted, please run the relevent scripts in the `data-preprocess` folder, i.e.
    ```bash
@@ -78,11 +82,20 @@ Before you begin, ensure you have [Miniconda](https://docs.conda.io/en/latest/mi
    python preprocess_vox2.py --in_audio_dir audio/wav16k/min --in_mouth_dir mouths --out_dir VOX2
    ```
 
+## Model Weights
+
+Pretrained model weights for the 4, 6 and 12 layer variations of RTFS-Net trained on the LRS2 dataset are available for download:
+
+[Download Model Weights](https://drive.google.com/file/d/1M5udD-65F6eASeI_0coOfl8IIugE79To/view?usp=sharing)
+
+These weights can be used for inference or as a starting point for fine-tuning on your own datasets.
+
 ## Training & Evaluation
 
 Training the AVSS model is a straightforward process using the `train.py` script. You can customize the training by specifying a configuration file and, if necessary, a checkpoint for resuming training. Here's how to get started:
 
 1. Run the training script with a default configuration file:
+
    ```bash
    python train.py --conf-dir config/lrs2_RTFSNet_4_layer.yaml
    ```
@@ -96,7 +109,8 @@ Training the AVSS model is a straightforward process using the `train.py` script
 Feel free to explore and fine-tune the configuration files in the `config` directory to suit your specific requirements and dataset.
 
 To train all the models, please use the run script provided:
-```bash 
+
+```bash
 bash run.sh
 ```
 
@@ -109,6 +123,7 @@ This implementation contains code from the [Asteroid](https://github.com/asteroi
 ## Citations
 
 If you find this code useful in your research, please cite our work:
+
 ```
 @article{pegg2023rtfs,
   title={RTFS-Net: Recurrent Time-Frequency Modelling for Efficient Audio-Visual Speech Separation},
